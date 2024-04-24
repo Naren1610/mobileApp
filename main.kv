@@ -1,0 +1,192 @@
+<testApp>:
+    name: 'login'
+    Screen:
+        Image:
+            source: "BGP.jpg"
+            size_hint: None, None
+            width: "360dp"
+            height: "640dp"
+            pos_hint: {'center_x': .5, 'center_y': .5}
+        MDLabel:
+            text: "Sn@pRide"
+            font_size: "48dp"
+            halign: "center"
+            color: "#000000"
+            pos_hint: {'center_y': .8}
+        MDTextField:
+            hint_text: "Username"
+            icon_right: "account"
+            font_size: "20dp"
+            size_hint_x: .85
+            pos_hint: {'center_x': .5, 'center_y': .65}
+            on_text: self.text = self.text.replace(" ", "")
+            write_tab: False
+        MDTextField:
+            id: pwd
+            hint_text: "Password"
+            password: True
+            icon_right: "eye-off"
+            font_size: "20dp"
+            size_hint_x: .85
+            pos_hint: {'center_x': .5, 'center_y': .5}
+            on_text: self.text = self.text.replace(" ", "")
+            write_tab: False
+        BoxLayout:
+            size_hint: .85, None
+            height: "30dp"
+            pos_hint: {'center_x': .5, 'center_y': .4}
+            spacing: "5dp"
+            MDCheckbox:
+                id: cb
+                size_hint: None, None
+                width: "30dp"
+                height: "30dp"
+                color: "#000000"
+                pos_hint: {'center_x': .5, 'center_y': .5}
+                on_press:
+                    pwd.password = False if pwd.password == True else True
+                    pwd.icon_right = "eye" if pwd.icon_right == "eye-off" else "eye-off"
+            MDLabel:
+                text: "[ref=Show password]Show Password[/ref]"
+                markup: True
+                color: "#000000"
+                pos_hint: {'center_x': .5, 'center_y': .5}
+                on_ref_press:
+                    cb.active = False if cb.active == True else True
+                    pwd.password = False if pwd.password == True else True
+                    pwd.icon_right = "eye" if pwd.icon_right == "eye-off" else "eye-off"
+        BoxLayout:
+            size_hint: .6, None
+            height: "30dp"
+            pos_hint: {'center_x': .5, 'center_y': .3}
+            spacing: "15dp"
+            MDFlatButton:
+                text: "SIGN IN"
+                font_size: "20dp"
+                size_hint_x: 1
+                md_bg_color: "#000000"
+                on_release:
+                    app.root.current = 'home'
+            MDFlatButton:
+                text: "SIGN UP"
+                font_size: "20dp"
+                size_hint_x: 1
+                md_bg_color: "#000000"
+
+<HomePage>:
+    name: 'home'
+    Screen:
+
+        BoxLayout:
+            orientation: 'vertical'
+
+            MDNavigationLayout:
+                ScreenManager:
+
+                    Screen:
+                        BoxLayout:
+                            orientation: 'vertical'
+                            spacing: "10dp"
+                            padding: "10dp"
+
+                            ScrollView:
+                                do_scroll_x: False
+                                do_scroll_y: True
+
+                                GridLayout:
+                                    cols: 1
+                                    size_hint_y: None
+                                    height: self.minimum_height
+                                    spacing: "10dp"
+
+                                    MDCard:
+                                        size_hint: None, None
+                                        size: "280dp", "140dp"
+                                        pos_hint: {"center_x": 0.5}
+                                        elevation: 12
+                                        radius: [8,]
+                                        MDBoxLayout:
+                                            orientation: "vertical"
+                                            padding: "8dp"
+
+                                            Image:
+                                                source: "card_image_1.png"
+                                                size_hint_y: 0.6
+                                                pos_hint: {"center_x": 0.5}
+
+                                            MDLabel:
+                                                text: "Explore Features"
+                                                theme_text_color: "Secondary"
+                                                halign: "center"
+
+                                    MDCard:
+                                        size_hint: None, None
+                                        size: "280dp", "140dp"
+                                        pos_hint: {"center_x": 0.5}
+                                        elevation: 12
+                                        radius: [8,]
+                                        MDBoxLayout:
+                                            orientation: "vertical"
+                                            padding: "8dp"
+
+                                            Image:
+                                                source: "card_image_2.png"
+                                                size_hint_y: 0.6
+                                                pos_hint: {"center_x": 0.5}
+
+                                            MDLabel:
+                                                text: "Settings & Configuration"
+                                                theme_text_color: "Secondary"
+                                                halign: "center"
+
+                                    MDCard:
+                                        size_hint: None, None
+                                        size: "280dp", "140dp"
+                                        pos_hint: {"center_x": 0.5}
+                                        elevation: 12
+                                        radius: [8,]
+                                        MDBoxLayout:
+                                            orientation: "vertical"
+                                            padding: "8dp"
+
+                                            Image:
+                                                source: "card_image_3.png"
+                                                size_hint_y: 0.6
+                                                pos_hint: {"center_x": 0.5}
+
+                                            MDLabel:
+                                                text: "Connect & Network"
+                                                theme_text_color: "Secondary"
+                                                halign: "center"
+
+                MDNavigationDrawer:
+                    id: nav_drawer
+
+                    BoxLayout:
+                        orientation: 'vertical'
+                        padding: "8dp"
+                        spacing: "8dp"
+
+                        Image:
+                            source: 'logo.png'
+                            size_hint: (1, 0.3)
+
+                        ScrollView:
+                            MDList:
+                                OneLineIconListItem:
+                                    text: "Profile"
+                                    on_release:
+                                        nav_drawer.set_state("close")
+                                        app.root.current = 'profile'
+
+                                    IconLeftWidget:
+                                        icon: "face-profile"
+
+                                OneLineIconListItem:
+                                    text: "Settings"
+                                    on_release:
+                                        nav_drawer.set_state("close")
+                                        app.root.current = 'settings'
+
+                                    IconLeftWidget:
+                                        icon: "settings"
