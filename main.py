@@ -65,13 +65,10 @@ class LoginPage(Screen):
 
 class HomePage(Screen):
     pass
+class BusTicketPage(Screen):
+    pass
 
 class MyApp(MDApp):
-    def build(self):
-        super().build()
-        self.menu = None  # Initialize the menu here
-        init_db()  # Initialize the database when the application starts
-        return Builder.load_file('main.kv')
 
     def signup(self, username, password):
         if self.validate_password(password):
@@ -100,9 +97,13 @@ class MyApp(MDApp):
     def build(self):
         self.theme_cls.theme_style = "Dark"
         self.theme_cls.primary_palette = "Amber"
+        init_db()
+        Builder.load_file('login.kv')
+
         sm = ScreenManager()
         sm.add_widget(LoginPage(name='login'))
         sm.add_widget(HomePage(name='home'))
+        sm.add_widget(BusTicketPage(name='bus_ticket'))
         return sm
     def process_destination(self,destination):
         if destination:
@@ -141,10 +142,12 @@ class MyApp(MDApp):
         image = Image(source=file_path, pos_hint={"center_x": 0.5, "center_y": 0.5})
         popup = Popup(title="QR Code", content=image, size_hint=(None, None), size=(300, 300))
         popup.open()
-    def toggle_extra_controls(self, layout):
-        # Toggle visibility by changing opacity
-        layout.opacity = 1 if layout.opacity == 0 else 0
+    # def toggle_extra_controls(self, layout):
+    #     # Toggle visibility by changing opacity
+    #     layout.opacity = 1 if layout.opacity == 0 else 0
 
+    def open_ticket_page(self):
+        self.root.current = 'bus_ticket'
     def process_button(self, transport_type):
         print(f"{transport_type} button pressed!")
         # Hide extra controls when other icons are clicked
@@ -154,9 +157,20 @@ class MyApp(MDApp):
         print("Passes button pressed!")
         # Implement functionality for 'Passes'
 
-    def process_tickets(self):
-        print("Tickets button pressed!")
-        # Implement functionality for 'Tickets'
+    def process_tickets(self,layout):
+        self.open_ticket_page()
+
+    def process_ticket_submission(self, pickup, destination):
+        if pickup and destination:
+            print(f"Pickup: {pickup}, Destination: {destination}")
+            # Add logic for handling the ticket data here
+            self.root.current = 'home'  # Optionally switch back to the home page or other relevant action
+        else:
+            print("Please enter both pickup and destination locations")
+    def switch_to_home(self):
+        # This assumes that you have a method or logic to switch views
+        self.root.current = 'home'
+        self.root.ids.tickets_controls.opacity = 0
 
     def on_start(self):
         self.menu = MDDropdownMenu(
@@ -198,5 +212,5 @@ class MyApp(MDApp):
 
 if __name__ == "__main__":
     Window.size = (360, 640)
-    Builder.load_file("main.kv")
+    #Builder.load_file("login.kv")
     MyApp().run()
