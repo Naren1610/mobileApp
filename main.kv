@@ -1,4 +1,4 @@
-<testApp>:
+<LoginPage>:
     name: 'login'
     Screen:
         Image:
@@ -14,6 +14,7 @@
             color: "#000000"
             pos_hint: {'center_y': .8}
         MDTextField:
+            id:username_field
             hint_text: "Username"
             icon_right: "account"
             font_size: "20dp"
@@ -31,6 +32,7 @@
             pos_hint: {'center_x': .5, 'center_y': .5}
             on_text: self.text = self.text.replace(" ", "")
             write_tab: False
+
         BoxLayout:
             size_hint: .85, None
             height: "30dp"
@@ -66,127 +68,87 @@
                 size_hint_x: 1
                 md_bg_color: "#000000"
                 on_release:
+                    app.signin(username_field.text, pwd.text)
                     app.root.current = 'home'
             MDFlatButton:
                 text: "SIGN UP"
                 font_size: "20dp"
                 size_hint_x: 1
                 md_bg_color: "#000000"
+                on_release:
+                    app.signup(username_field.text, pwd.text)
+
+
 
 <HomePage>:
     name: 'home'
     Screen:
+        FloatLayout:
 
-        BoxLayout:
-            orientation: 'vertical'
+            # Title row with just a label
+            MDLabel:
+                text: "Sn@pRide"
+                font_size: "24sp"
+                size_hint: (1, None)
+                height: "60dp"
+                pos_hint: {'center_x': 0.5, 'top': 1}
+                halign: 'center'
+                color: "#000000"  # Black font
+                md_bg_color: 1, 0.9, 0, 1  # Yellow background
 
-            MDNavigationLayout:
-                ScreenManager:
+            # Row with buttons
+            BoxLayout:
+                id: main_button_layout
+                size_hint: (1, None)
+                height: "60dp"
+                pos_hint: {'center_x': 0.5, 'top': 0.925}
 
-                    Screen:
-                        BoxLayout:
-                            orientation: 'vertical'
-                            spacing: "10dp"
-                            padding: "10dp"
+                MDIconButton:
+                    icon: "bus"
+                    user_font_size: "32sp"
+                    on_release: app.toggle_extra_controls(root.ids.extra_controls_layout)
+                MDIconButton:
+                    icon: "train"
+                    user_font_size: "32sp"
+                    on_release: app.process_button('train')
+                MDIconButton:
+                    icon: "airplane"
+                    user_font_size: "32sp"
+                    on_release: app.process_button('fly')
+                MDIconButton:
+                    icon: "car"
+                    user_font_size: "32sp"
+                    on_release: app.process_button('car')
+                MDIconButton:
+                    icon: "bike"
+                    user_font_size: "32sp"
+                    on_release: app.process_button('bike')
 
-                            ScrollView:
-                                do_scroll_x: False
-                                do_scroll_y: True
 
-                                GridLayout:
-                                    cols: 1
-                                    size_hint_y: None
-                                    height: self.minimum_height
-                                    spacing: "10dp"
 
-                                    MDCard:
-                                        size_hint: None, None
-                                        size: "280dp", "140dp"
-                                        pos_hint: {"center_x": 0.5}
-                                        elevation: 12
-                                        radius: [8,]
-                                        MDBoxLayout:
-                                            orientation: "vertical"
-                                            padding: "8dp"
+            FloatLayout:
+                id: extra_controls_layout
+                size_hint: (None, None)
+                size: ("360dp", "120dp")
+                pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+                opacity: 0  # Start as hidden
 
-                                            Image:
-                                                source: "card_image_1.png"
-                                                size_hint_y: 0.6
-                                                pos_hint: {"center_x": 0.5}
+                MDRaisedButton:
+                    text: "Passes"
+                    size_hint: None, None
+                    size: ("120dp", "48dp")
+                    pos_hint: {'center_x': 0.4, 'center_y': 0.75}
 
-                                            MDLabel:
-                                                text: "Explore Features"
-                                                theme_text_color: "Secondary"
-                                                halign: "center"
+                MDRaisedButton:
+                    text: "Tickets"
+                    size_hint: None, None
+                    size: ("120dp", "48dp")
+                    pos_hint: {'center_x': 0.6, 'center_y': 0.75}
 
-                                    MDCard:
-                                        size_hint: None, None
-                                        size: "280dp", "140dp"
-                                        pos_hint: {"center_x": 0.5}
-                                        elevation: 12
-                                        radius: [8,]
-                                        MDBoxLayout:
-                                            orientation: "vertical"
-                                            padding: "8dp"
-
-                                            Image:
-                                                source: "card_image_2.png"
-                                                size_hint_y: 0.6
-                                                pos_hint: {"center_x": 0.5}
-
-                                            MDLabel:
-                                                text: "Settings & Configuration"
-                                                theme_text_color: "Secondary"
-                                                halign: "center"
-
-                                    MDCard:
-                                        size_hint: None, None
-                                        size: "280dp", "140dp"
-                                        pos_hint: {"center_x": 0.5}
-                                        elevation: 12
-                                        radius: [8,]
-                                        MDBoxLayout:
-                                            orientation: "vertical"
-                                            padding: "8dp"
-
-                                            Image:
-                                                source: "card_image_3.png"
-                                                size_hint_y: 0.6
-                                                pos_hint: {"center_x": 0.5}
-
-                                            MDLabel:
-                                                text: "Connect & Network"
-                                                theme_text_color: "Secondary"
-                                                halign: "center"
-
-                MDNavigationDrawer:
-                    id: nav_drawer
-
-                    BoxLayout:
-                        orientation: 'vertical'
-                        padding: "8dp"
-                        spacing: "8dp"
-
-                        Image:
-                            source: 'logo.png'
-                            size_hint: (1, 0.3)
-
-                        ScrollView:
-                            MDList:
-                                OneLineIconListItem:
-                                    text: "Profile"
-                                    on_release:
-                                        nav_drawer.set_state("close")
-                                        app.root.current = 'profile'
-
-                                    IconLeftWidget:
-                                        icon: "face-profile"
-
-                                OneLineIconListItem:
-                                    text: "Settings"
-                                    on_release:
-                                        nav_drawer.set_state("close")
-                                        app.root.current = 'settings'
-
-                                    IconLeftWidget:
-                                        icon: "settings"
+                MDTextField:
+                    id: destination_search
+                    hint_text: "Enter destination"
+                    size_hint: (0.8, None)
+                    height: "30dp"
+                    pos_hint: {'center_x': 0.5, 'center_y': 0.25}
+                    on_text: app.update_autocomplete(self)
