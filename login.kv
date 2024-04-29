@@ -77,9 +77,6 @@
                 md_bg_color: "#000000"
                 on_release:
                     app.signup(username_field.text, pwd.text)
-
-
-
 <HomePage>:
     name: 'home'
     Screen:
@@ -101,12 +98,13 @@
                 id: main_button_layout
                 size_hint: (1, None)
                 height: "60dp"
-                pos_hint: {'center_x': 0.5, 'top': 0.925}
+                pos_hint: {'center_x': 0.65, 'top': 0.925}
 
                 MDIconButton:
                     icon: "bus"
                     user_font_size: "32sp"
-                    on_release: app.toggle_extra_controls(root.ids.extra_controls_layout)
+                    on_release: app.open_ticket_page()
+
                 MDIconButton:
                     icon: "train"
                     user_font_size: "32sp"
@@ -125,30 +123,129 @@
                     on_release: app.process_button('bike')
 
 
-
             FloatLayout:
                 id: extra_controls_layout
                 size_hint: (None, None)
                 size: ("360dp", "120dp")
                 pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-                opacity: 0  # Start as hidden
+
 
                 MDRaisedButton:
                     text: "Passes"
                     size_hint: None, None
                     size: ("120dp", "48dp")
-                    pos_hint: {'center_x': 0.4, 'center_y': 0.75}
+                    pos_hint: {'center_x': 0.3, 'center_y': 0.80}
 
                 MDRaisedButton:
                     text: "Tickets"
                     size_hint: None, None
                     size: ("120dp", "48dp")
-                    pos_hint: {'center_x': 0.6, 'center_y': 0.75}
+                    pos_hint: {'center_x': 0.7, 'center_y': 0.80}
+
+
 
                 MDTextField:
                     id: destination_search
                     hint_text: "Enter destination"
                     size_hint: (0.8, None)
                     height: "30dp"
-                    pos_hint: {'center_x': 0.5, 'center_y': 0.25}
+                    pos_hint: {'center_x': 0.5, 'center_y': 0.20}
                     on_text: app.update_autocomplete(self)
+
+
+
+        # Row with additional buttons at the bottom
+            BoxLayout:
+                id: footer
+                size_hint: (1, None)
+                height: "60dp"
+                pos_hint: {'center_x': 0.65, 'bottom': 0}
+
+                MDFlatButton:
+                    text: "Home"
+                    on_release: app.root.current = 'home'
+
+                MDFlatButton:
+                    text: "Wallet"
+
+                MDFlatButton:
+                    text: "History"
+
+                MDFlatButton:
+                    text: "Profile"
+
+
+<BusTicketPage>:
+    name: 'bus_ticket'
+    FloatLayout:
+
+          # Title row with just a label
+        MDLabel:
+            text: "Sn@pRide"
+            font_size: "24sp"
+            size_hint: (1, None)
+            height: "60dp"
+            pos_hint: {'center_x': 0.5, 'top': 1}
+            halign: 'center'
+            color: "#000000"  # Black font
+            md_bg_color: 1, 0.9, 0, 1  # Yellow background
+
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint: (1, None)
+            height: self.minimum_height
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+
+            MDTextField:
+                id: pickup_location
+                hint_text: "Enter pickup location"
+                size_hint_x: 1
+                size_hint_y: None
+                height: dp(48)
+
+            MDTextField:
+                id: destination_location
+                hint_text: "Enter destination"
+                size_hint_x: 1
+                size_hint_y: None
+                height: dp(48)
+
+            MDRaisedButton:
+                text: "Submit"
+                size_hint: None, None
+                size: 3 * dp(48), dp(48)
+                pos_hint: {'center_x': 0.5}
+                on_release: app.process_ticket_submission(root.ids.pickup_location.text, root.ids.destination_location.text)
+
+        BoxLayout:
+            id: footer
+            size_hint: (1, None)
+            height: "60dp"
+            pos_hint: {'center_x': 0.65, 'bottom': 0}
+
+            MDFlatButton:
+                text: "Home"
+                on_release: app.root.current = 'home'
+
+            MDFlatButton:
+                text: "Wallet"
+
+            MDFlatButton:
+                text: "History"
+
+            MDFlatButton:
+                text: "Profile"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
