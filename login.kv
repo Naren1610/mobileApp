@@ -135,6 +135,7 @@
                     size_hint: None, None
                     size: ("120dp", "48dp")
                     pos_hint: {'center_x': 0.3, 'center_y': 0.80}
+                    on_release: app.root.current = 'pass_registration'
 
                 MDRaisedButton:
                     text: "Tickets"
@@ -227,6 +228,64 @@
                 text: "Home"
                 on_release: app.root.current = 'home'
 
+            MDFlatButton:
+                text: "Wallet"
+
+            MDFlatButton:
+                text: "History"
+
+            MDFlatButton:
+                text: "Profile"
+
+<PassRegistrationPage>:
+    name:'pass_registration'
+    FloatLayout:
+        MDTextField:
+            id: full_name
+            hint_text: "Full Name"
+            size_hint: 0.8, None
+            pos_hint: {'center_x': 0.5, 'center_y': 0.8}
+
+        MDTextField:
+            id: dob
+            hint_text: "Date of Birth"
+            size_hint: 0.8, None
+            pos_hint: {'center_x': 0.5, 'center_y': 0.7}
+
+        MDTextField:
+            id: institution
+            hint_text: "School/College/University"
+            size_hint: 0.8, None
+            pos_hint: {'center_x': 0.5, 'center_y': 0.6}
+
+        MDRaisedButton:
+            text: "Choose Certificate"
+            size_hint: 0.8, None
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+            on_release: root.show_file_chooser('certificate')
+
+        MDRaisedButton:
+            text: "Choose Photo"
+            size_hint: 0.8, None
+            pos_hint: {'center_x': 0.5, 'center_y': 0.4}
+            on_release: root.show_file_chooser('photo')
+
+        MDRaisedButton:
+            text: "Register"
+            size_hint: None, None
+            size: 3 * dp(48), dp(48)
+            pos_hint: {'center_x': 0.5, 'center_y': 0.3}
+            on_release: root.submit_registration()
+
+        BoxLayout:
+            id: header
+            size_hint: (1, None)
+            height: "60dp"
+            pos_hint: {'center_x': 0.65, 'bottom': 0}
+
+            MDFlatButton:
+                text: "Home"
+                on_release: app.root.current = 'home'
             MDFlatButton:
                 text: "Wallet"
 

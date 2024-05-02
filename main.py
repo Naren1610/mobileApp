@@ -1,3 +1,5 @@
+from kivy.properties import ObjectProperty
+from kivy.uix.filechooser import FileChooserIconView
 from kivy.uix.popup import Popup
 from kivymd.app import MDApp
 from kivy.lang import Builder
@@ -9,6 +11,7 @@ import tempfile
 import pyodbc
 from kivymd.uix.list import OneLineListItem
 from kivymd.uix.menu import MDDropdownMenu
+import os
 
 
 def get_connection():
@@ -67,6 +70,61 @@ class HomePage(Screen):
     pass
 class BusTicketPage(Screen):
     pass
+class PassRegistrationPage(Screen):
+    certificate_path = ''
+    photo_path = ''
+
+    def show_file_chooser(self, file_type):
+        content = FileChooserIconView(filters=self.get_filters(file_type))
+        content.bind(on_submit=self.select_file(file_type))
+        popup = Popup(title="Select File", content=content, size_hint=(0.9, 0.9))
+        popup.open()
+
+    def get_filters(self, file_type):
+        if file_type == 'certificate':
+            return ['*.pdf', '*.doc', '*.docx']
+        elif file_type == 'photo':
+            return ['*.jpg', '*.jpeg', '*.png']
+        return []
+
+    def select_file(self, file_type):
+        def on_file_selected(instance, selection):
+            if file_type == 'certificate':
+                self.certificate_path = selection[0]
+            elif file_type == 'photo':
+                self.photo_path = selection[0]
+            instance.parent.dismiss()  # Close the file chooser dialog
+
+        return on_file_selected
+    def submit_registration(self, full_name, dob, institution, certificate_files, photo_files):
+        try:
+            if not certificate_files or not photo_files:
+                raise Exception("Please select both a certificate and a photo.")
+
+            certificate_path = certificate_files[0]  # Assuming single selection
+            photo_path = photo_files[0]  # Assuming single selection
+
+            # Check file sizes (e.g., 5MB for certificates, 2MB for photos)
+            if os.path.getsize(certificate_path) > 5 * 1024 * 1024:
+                raise Exception("Certificate file size should not exceed 5MB.")
+            if os.path.getsize(photo_path) > 2 * 1024 * 1024:
+                raise Exception("Photo file size should not exceed 2MB.")
+
+            certificate_data = self.read_file(certificate_path)
+            photo_data = self.read_file(photo_path)
+
+            if self.save_registration(full_name, dob, institution, certificate_data, photo_data):
+                print("Registration successful")
+                self.manager.current = 'home'
+            else:
+                print("Registration failed")
+        except Exception as e:
+            print(f"Error: {str(e)}")
+
+    def read_file(self, file_path):
+        with open(file_path, 'rb') as file:
+            return file.read()
+
 
 class MyApp(MDApp):
 
@@ -104,6 +162,8 @@ class MyApp(MDApp):
         sm.add_widget(LoginPage(name='login'))
         sm.add_widget(HomePage(name='home'))
         sm.add_widget(BusTicketPage(name='bus_ticket'))
+        sm.add_widget(PassRegistrationPage(name='pass_registration'))
+
         return sm
     def process_destination(self,destination):
         if destination:
@@ -145,6 +205,7 @@ class MyApp(MDApp):
     # def toggle_extra_controls(self, layout):
     #     # Toggle visibility by changing opacity
     #     layout.opacity = 1 if layout.opacity == 0 else 0
+
 
     def open_ticket_page(self):
         self.root.current = 'bus_ticket'
