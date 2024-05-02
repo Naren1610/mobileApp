@@ -11,6 +11,9 @@ import tempfile
 import pyodbc
 from kivymd.uix.list import OneLineListItem
 from kivymd.uix.menu import MDDropdownMenu
+from kivymd.uix.pickers import MDDatePicker
+
+from datetime import datetime
 import os
 
 
@@ -70,6 +73,12 @@ class HomePage(Screen):
     pass
 class BusTicketPage(Screen):
     pass
+
+
+from kivy.uix.popup import Popup
+from kivy.uix.label import Label
+
+
 class PassRegistrationPage(Screen):
     certificate_path = ''
     photo_path = ''
@@ -89,41 +98,59 @@ class PassRegistrationPage(Screen):
 
     def select_file(self, file_type):
         def on_file_selected(instance, selection):
+            if not selection:
+                self.ids[file_type + '_error'].text = 'File selection is mandatory.'
+                return
             if file_type == 'certificate':
                 self.certificate_path = selection[0]
             elif file_type == 'photo':
                 self.photo_path = selection[0]
+            self.ids[file_type + '_error'].text = ''
             instance.parent.dismiss()  # Close the file chooser dialog
 
         return on_file_selected
-    def submit_registration(self, full_name, dob, institution, certificate_files, photo_files):
-        try:
-            if not certificate_files or not photo_files:
-                raise Exception("Please select both a certificate and a photo.")
 
-            certificate_path = certificate_files[0]  # Assuming single selection
-            photo_path = photo_files[0]  # Assuming single selection
 
-            # Check file sizes (e.g., 5MB for certificates, 2MB for photos)
-            if os.path.getsize(certificate_path) > 5 * 1024 * 1024:
-                raise Exception("Certificate file size should not exceed 5MB.")
-            if os.path.getsize(photo_path) > 2 * 1024 * 1024:
-                raise Exception("Photo file size should not exceed 2MB.")
+    def submit_registration(self):
+        if not self.validate_fields():
+            return
+        print(f"Processing registration with the files: {self.certificate_path}, {self.photo_path}")
+        # Process registration here
+        Popup(content=Label(text='Registration Successful!'), size_hint=(None, None), size=(400, 400)).open()
 
-            certificate_data = self.read_file(certificate_path)
-            photo_data = self.read_file(photo_path)
+    def validate_fields(self):
+        valid = True
+        if not self.ids.full_name.text:
+            self.ids.full_name_error.text = 'Full name is required.'
+            valid = False
+        else:
+            self.ids.full_name_error.text = ''
 
-            if self.save_registration(full_name, dob, institution, certificate_data, photo_data):
-                print("Registration successful")
-                self.manager.current = 'home'
-            else:
-                print("Registration failed")
-        except Exception as e:
-            print(f"Error: {str(e)}")
+        if not self.ids.dob.text:
+            self.ids.dob_error.text = 'Date of birth is required.'
+            valid = False
+        else:
+            self.ids.dob_error.text = ''
 
-    def read_file(self, file_path):
-        with open(file_path, 'rb') as file:
-            return file.read()
+        if not self.ids.institution.text:
+            self.ids.institution_error.text = 'Institution name is required.'
+            valid = False
+        else:
+            self.ids.institution_error.text = ''
+
+        if not self.certificate_path:
+            self.ids.certificate_error.text = 'Please select a certificate.'
+            valid = False
+        else:
+            self.ids.certificate_error.text = ''
+
+        if not self.photo_path:
+            self.ids.photo_error.text = 'Please select a photo.'
+            valid = False
+        else:
+            self.ids.photo_error.text = ''
+
+        return valid
 
 
 class MyApp(MDApp):
@@ -136,6 +163,8 @@ class MyApp(MDApp):
                 print("Username already exists!")
         else:
             print("Password does not meet the requirements!")
+
+
 
     def signin(self, username, password):
         if check_user(username, password):
@@ -165,6 +194,33 @@ class MyApp(MDApp):
         sm.add_widget(PassRegistrationPage(name='pass_registration'))
 
         return sm
+
+    def date_input_filter(self, value, from_undo=False):
+        allowed_chars = "0123456789/"
+        if all(char in allowed_chars for char in value[-1]):
+            parts = value.split("/")
+            if len(parts) > 3:
+                return value[:-1]
+            for part in parts:
+                if len(part) > 2:
+                    return value[:-1]
+            return value
+        return value[:-1]
+
+    def validate_date(self, date_text):
+        try:
+            datetime.strptime(date_text, '%d/%m/%Y')
+            return True
+        except ValueError:
+            return False
+
+    def date_filter(self, value, from_undo):
+        # Allow numbers and slashes only
+        allowed_chars = "0123456789/"
+        if all(char in allowed_chars for char in value):
+            return value
+        return ''
+
     def process_destination(self,destination):
         if destination:
             #simulating wallet balance

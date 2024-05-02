@@ -238,43 +238,75 @@
                 text: "Profile"
 
 <PassRegistrationPage>:
-    name:'pass_registration'
+    name: 'pass_registration'
     FloatLayout:
         MDTextField:
             id: full_name
             hint_text: "Full Name"
             size_hint: 0.8, None
             pos_hint: {'center_x': 0.5, 'center_y': 0.8}
+        MDLabel:
+            id: full_name_error
+            text: ""
+            color: 1, 0, 0, 1  # Red color for errors
+            size_hint: 0.8, None
+            pos_hint: {'center_x': 0.5, 'center_y': 0.75}
 
         MDTextField:
             id: dob
-            hint_text: "Date of Birth"
+            hint_text: "Date of Birth (dd/mm/yyyy)"
+            input_filter: app.date_input_filter
             size_hint: 0.8, None
             pos_hint: {'center_x': 0.5, 'center_y': 0.7}
+            on_text_validate: app.validate_date(self.text)
+        MDLabel:
+            id: dob_error
+            text: ""
+            color: 1, 0, 0, 1
+            size_hint: 0.8, None
+            pos_hint: {'center_x': 0.5, 'center_y': 0.65}
 
         MDTextField:
             id: institution
             hint_text: "School/College/University"
             size_hint: 0.8, None
             pos_hint: {'center_x': 0.5, 'center_y': 0.6}
+        MDLabel:
+            id: institution_error
+            text: ""
+            color: 1, 0, 0, 1
+            size_hint: 0.8, None
+            pos_hint: {'center_x': 0.5, 'center_y': 0.55}
 
         MDRaisedButton:
             text: "Choose Certificate"
             size_hint: 0.8, None
             pos_hint: {'center_x': 0.5, 'center_y': 0.5}
             on_release: root.show_file_chooser('certificate')
+        MDLabel:
+            id: certificate_error
+            text: ""
+            color: 1, 0, 0, 1
+            size_hint: 0.8, None
+            pos_hint: {'center_x': 0.5, 'center_y': 0.45}
 
         MDRaisedButton:
             text: "Choose Photo"
             size_hint: 0.8, None
             pos_hint: {'center_x': 0.5, 'center_y': 0.4}
             on_release: root.show_file_chooser('photo')
+        MDLabel:
+            id: photo_error
+            text: ""
+            color: 1, 0, 0, 1
+            size_hint: 0.8, None
+            pos_hint: {'center_x': 0.5, 'center_y': 0.35}
 
         MDRaisedButton:
             text: "Register"
             size_hint: None, None
             size: 3 * dp(48), dp(48)
-            pos_hint: {'center_x': 0.5, 'center_y': 0.3}
+            pos_hint: {'center_x': 0.5, 'center_y': 0.25}
             on_release: root.submit_registration()
 
         BoxLayout:
