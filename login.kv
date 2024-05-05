@@ -290,6 +290,18 @@
             size_hint: 0.8, None
             pos_hint: {'center_x': 0.5, 'center_y': 0.45}
 
+        MDLabel:
+            id: certificate_name
+            text: ""
+            size_hint: 0.8, None
+            pos_hint: {'center_x': 0.5, 'center_y': 0.45}
+        MDIconButton:
+            icon: "close"
+            size_hint: None, None
+            size: dp(48), dp(48)
+            pos_hint: {'center_x': 0.75, 'center_y': 0.45}
+            on_release: root.clear_selection('certificate')
+
         MDRaisedButton:
             text: "Choose Photo"
             size_hint: 0.8, None
@@ -301,6 +313,17 @@
             color: 1, 0, 0, 1
             size_hint: 0.8, None
             pos_hint: {'center_x': 0.5, 'center_y': 0.35}
+        MDLabel:
+            id: photo_name
+            text: ""
+            size_hint: 0.8, None
+            pos_hint: {'center_x': 0.5, 'center_y': 0.35}
+        MDIconButton:
+            icon: "close"
+            size_hint: None, None
+            size: dp(48), dp(48)
+            pos_hint: {'center_x': 0.75, 'center_y': 0.45}
+            on_release: root.clear_selection('certificate')
 
         MDRaisedButton:
             text: "Register"

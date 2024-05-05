@@ -1,5 +1,8 @@
+from os.path import basename
+
 from kivy.properties import ObjectProperty
-from kivy.uix.filechooser import FileChooserIconView
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.filechooser import FileChooserIconView, FileChooserListView
 from kivy.uix.popup import Popup
 from kivymd.app import MDApp
 from kivy.lang import Builder
@@ -96,21 +99,41 @@ class PassRegistrationPage(Screen):
             return ['*.jpg', '*.jpeg', '*.png']
         return []
 
-    def select_file(self, file_type):
-        def on_file_selected(instance, selection):
-            if not selection:
-                self.ids[file_type + '_error'].text = 'File selection is mandatory.'
-                return
+    popup = None  # Reference to the popup
+
+    def show_file_chooser(self, file_type):
+        filechooser = FileChooserIconView(filters=['*.*'], size_hint=(1, 0.9))
+        filechooser.bind(
+            on_submit=lambda instance, selection, touch: self.on_file_selected(instance, selection, touch, file_type))
+
+        layout = BoxLayout(orientation='vertical')
+        layout.add_widget(filechooser)
+
+        self.popup = Popup(content=layout, size_hint=(0.9, 0.9), title="Select File")
+        self.popup.open()
+
+    def on_file_selected(self, instance, selection, touch, file_type):
+        if selection:
+            file_path = selection[0]  # Assuming the user selects one file
+            file_name = basename(file_path)  # Extracts the file name from the path
             if file_type == 'certificate':
-                self.certificate_path = selection[0]
+                self.ids.certificate_name.text = f"Selected: {file_name}"
+                self.certificate_path = file_path
             elif file_type == 'photo':
-                self.photo_path = selection[0]
-            self.ids[file_type + '_error'].text = ''
-            instance.parent.dismiss()  # Close the file chooser dialog
+                self.ids.photo_name.text = f"Selected: {file_name}"
+                self.photo_path = file_path
 
-        return on_file_selected
+        if self.popup:
+            self.popup.dismiss()
+            self.popup = None
 
-
+    def clear_selection(self, file_type):
+        if file_type == 'certificate':
+            self.ids.certificate_name.text = ""
+            self.certificate_path = None
+        elif file_type == 'photo':
+            self.ids.photo_name.text = ""
+            self.photo_path = None
     def submit_registration(self):
         if not self.validate_fields():
             return
