@@ -14,19 +14,23 @@ import tempfile
 import pyodbc
 from kivymd.uix.list import OneLineListItem
 from kivymd.uix.menu import MDDropdownMenu
+from hashlib import sha256
 from kivymd.uix.pickers import MDDatePicker
-
+from kivy.uix.popup import Popup
+from kivy.uix.label import Label
 from datetime import datetime
 import os
 
 
 def get_connection():
     connection_string = (
-    "DRIVER={ODBC Driver 17 for SQL Server};"
-    "SERVER=MRYADAV\SQLEXPRESS;DATABASE=mobileApp;"
-    "Trusted_Connection=yes;"
-)
+        "DRIVER={ODBC Driver 17 for SQL Server};"
+        "SERVER=MRYADAV\SQLEXPRESS;DATABASE=mobileApp;"
+        "Trusted_Connection=yes;"
+    )
     return pyodbc.connect(connection_string)
+
+
 def init_db():
     conn = get_connection()
     cursor = conn.cursor()
@@ -34,52 +38,76 @@ def init_db():
            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'users')
            CREATE TABLE users (
                id INT IDENTITY(1,1) PRIMARY KEY,
-               username NVARCHAR(50) UNIQUE NOT NULL,
+               firstname NVARCHAR(30) NOT NULL,
+               lastname NVARCHAR(30) NOT NULL,
+               email NVARCHAR(50) UNIQUE NOT NULL,
+               phone NVARCHAR(15) UNIQUE NOT NULL,
                password NVARCHAR(255) NOT NULL
            );
        ''')
     conn.commit()
     conn.close()
 
-from hashlib import sha256
 
-def add_user(username, password):
-    conn = get_connection()
-    cursor = conn.cursor()
-    hashed_password = sha256(password.encode()).hexdigest()
-    try:
-        cursor.execute('INSERT INTO users (username, password) VALUES (?, ?)', (username, hashed_password))
-        conn.commit()
-        return True
-    except pyodbc.IntegrityError:
-        return False
-    finally:
-        conn.close()
+class SignupScreen(Screen):
+    def signup(self, phone, password):
+        if self.validate_password(password):
+            if self.add_user(phone, password):
+                print("User created successfully!")
+            else:
+                print("Username already exists!")
+        else:
+            print("Password does not meet the requirements!")
 
-def check_user(username, password):
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute('SELECT password FROM users WHERE username = ?', (username,))
-    result = cursor.fetchone()
-    conn.close()
-    if result:
+
+    def add_user(self,firstname, lastname, email,phone, password):
+        conn = get_connection()
+        cursor = conn.cursor()
         hashed_password = sha256(password.encode()).hexdigest()
-        return hashed_password == result[0]
-    return False
+        try:
+            cursor.execute('INSERT INTO users (firstname, lastname, email, phone, password) VALUES (?, ?, ?, ?, ?)', (firstname, lastname, email, phone, hashed_password))
+            conn.commit()
+            return True
+        except pyodbc.IntegrityError:
+            return False
+        finally:
+            conn.close()
+        self.manager.current = 'login'
 
+    def check_user(phone, password):
+        conn = phone.get_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT password FROM users WHERE phone = ?', (phone,))
+        result = cursor.fetchone()
+        conn.close()
+        if result:
+            hashed_password = sha256(password.encode()).hexdigest()
+            return hashed_password == result[0]
+        return False
 
 
 class LoginPage(Screen):
-    pass
+    def signin(self, phone, password):
+        if SignupScreen.check_user(phone, password):
+            print("Login successful!")
+        else:
+            print("Invalid username or password!")
+
+    def validate_password(self, password):
+        if len(password) < 6:
+            return False
+        if not any(char.isupper() for char in password):
+            return False
+        if not any(char in '!@#$%^&*()-_=+[]{};:"\'|,<>.?/' for char in password):
+            return False
+        return True
+
 
 class HomePage(Screen):
     pass
 class BusTicketPage(Screen):
     pass
 
-
-from kivy.uix.popup import Popup
-from kivy.uix.label import Label
 
 
 class PassRegistrationPage(Screen):
@@ -177,42 +205,17 @@ class PassRegistrationPage(Screen):
 
 
 class MyApp(MDApp):
-
-    def signup(self, username, password):
-        if self.validate_password(password):
-            if add_user(username, password):
-                print("User created successfully!")
-            else:
-                print("Username already exists!")
-        else:
-            print("Password does not meet the requirements!")
-
-
-
-    def signin(self, username, password):
-        if check_user(username, password):
-            print("Login successful!")
-        else:
-            print("Invalid username or password!")
-
-    def validate_password(self, password):
-        if len(password) < 6:
-            return False
-        if not any(char.isupper() for char in password):
-            return False
-        if not any(char in '!@#$%^&*()-_=+[]{};:"\'|,<>.?/' for char in password):
-            return False
-        return True
-
     def build(self):
         self.theme_cls.theme_style = "Dark"
         self.theme_cls.primary_palette = "Amber"
         init_db()
         Builder.load_file('login.kv')
+        Builder.load_file('signup.kv')
 
         sm = ScreenManager()
         sm.add_widget(LoginPage(name='login'))
         sm.add_widget(HomePage(name='home'))
+        sm.add_widget(SignupScreen(name='signup'))
         sm.add_widget(BusTicketPage(name='bus_ticket'))
         sm.add_widget(PassRegistrationPage(name='pass_registration'))
 

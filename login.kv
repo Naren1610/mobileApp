@@ -14,9 +14,9 @@
             color: "#000000"
             pos_hint: {'center_y': .8}
         MDTextField:
-            id:username_field
-            hint_text: "Username"
-            icon_right: "account"
+            id:phone
+            hint_text: "phone"
+            icon_right: "phone"
             font_size: "20dp"
             size_hint_x: .85
             pos_hint: {'center_x': .5, 'center_y': .65}
@@ -68,7 +68,7 @@
                 size_hint_x: 1
                 md_bg_color: "#000000"
                 on_release:
-                    app.signin(username_field.text, pwd.text)
+                    app.signin(phone.text, pwd.text)
                     app.root.current = 'home'
             MDFlatButton:
                 text: "SIGN UP"
@@ -76,7 +76,7 @@
                 size_hint_x: 1
                 md_bg_color: "#000000"
                 on_release:
-                    app.signup(username_field.text, pwd.text)
+                    app.root.current = 'signup'
 <HomePage>:
     name: 'home'
     Screen:
