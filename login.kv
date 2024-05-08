@@ -8,7 +8,7 @@
             height: "640dp"
             pos_hint: {'center_x': .5, 'center_y': .5}
         MDLabel:
-            text: "Sn@pRide"
+            text: "SnapRide"
             font_size: "48dp"
             halign: "center"
             color: "#000000"
@@ -68,7 +68,7 @@
                 size_hint_x: 1
                 md_bg_color: "#000000"
                 on_release:
-                    app.signin(phone.text, pwd.text)
+                    root.signin(phone.text, pwd.text)
                     app.root.current = 'home'
             MDFlatButton:
                 text: "SIGN UP"
@@ -77,104 +77,6 @@
                 md_bg_color: "#000000"
                 on_release:
                     app.root.current = 'signup'
-<HomePage>:
-    name: 'home'
-    Screen:
-        FloatLayout:
-
-            # Title row with just a label
-            MDLabel:
-                text: "Sn@pRide"
-                font_size: "24sp"
-                size_hint: (1, None)
-                height: "60dp"
-                pos_hint: {'center_x': 0.5, 'top': 1}
-                halign: 'center'
-                color: "#000000"  # Black font
-                md_bg_color: 1, 0.9, 0, 1  # Yellow background
-
-            # Row with buttons
-            BoxLayout:
-                id: main_button_layout
-                size_hint: (1, None)
-                height: "60dp"
-                pos_hint: {'center_x': 0.65, 'top': 0.925}
-
-                MDIconButton:
-                    icon: "bus"
-                    user_font_size: "32sp"
-                    on_release: app.open_ticket_page()
-
-                MDIconButton:
-                    icon: "train"
-                    user_font_size: "32sp"
-                    on_release: app.process_button('train')
-                MDIconButton:
-                    icon: "airplane"
-                    user_font_size: "32sp"
-                    on_release: app.process_button('fly')
-                MDIconButton:
-                    icon: "car"
-                    user_font_size: "32sp"
-                    on_release: app.process_button('car')
-                MDIconButton:
-                    icon: "bike"
-                    user_font_size: "32sp"
-                    on_release: app.process_button('bike')
-
-
-            FloatLayout:
-                id: extra_controls_layout
-                size_hint: (None, None)
-                size: ("360dp", "120dp")
-                pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-
-
-                MDRaisedButton:
-                    text: "Passes"
-                    size_hint: None, None
-                    size: ("120dp", "48dp")
-                    pos_hint: {'center_x': 0.3, 'center_y': 0.80}
-                    on_release: app.root.current = 'pass_registration'
-
-                MDRaisedButton:
-                    text: "Tickets"
-                    size_hint: None, None
-                    size: ("120dp", "48dp")
-                    pos_hint: {'center_x': 0.7, 'center_y': 0.80}
-
-
-
-                MDTextField:
-                    id: destination_search
-                    hint_text: "Enter destination"
-                    size_hint: (0.8, None)
-                    height: "30dp"
-                    pos_hint: {'center_x': 0.5, 'center_y': 0.20}
-                    on_text: app.update_autocomplete(self)
-
-
-
-        # Row with additional buttons at the bottom
-            BoxLayout:
-                id: footer
-                size_hint: (1, None)
-                height: "60dp"
-                pos_hint: {'center_x': 0.65, 'bottom': 0}
-
-                MDFlatButton:
-                    text: "Home"
-                    on_release: app.root.current = 'home'
-
-                MDFlatButton:
-                    text: "Wallet"
-
-                MDFlatButton:
-                    text: "History"
-
-                MDFlatButton:
-                    text: "Profile"
-
 
 <BusTicketPage>:
     name: 'bus_ticket'
@@ -237,118 +139,6 @@
             MDFlatButton:
                 text: "Profile"
 
-<PassRegistrationPage>:
-    name: 'pass_registration'
-    FloatLayout:
-        MDTextField:
-            id: full_name
-            hint_text: "Full Name"
-            size_hint: 0.8, None
-            pos_hint: {'center_x': 0.5, 'center_y': 0.8}
-        MDLabel:
-            id: full_name_error
-            text: ""
-            color: 1, 0, 0, 1  # Red color for errors
-            size_hint: 0.8, None
-            pos_hint: {'center_x': 0.5, 'center_y': 0.75}
-
-        MDTextField:
-            id: dob
-            hint_text: "Date of Birth (dd/mm/yyyy)"
-            input_filter: app.date_input_filter
-            size_hint: 0.8, None
-            pos_hint: {'center_x': 0.5, 'center_y': 0.7}
-            on_text_validate: app.validate_date(self.text)
-        MDLabel:
-            id: dob_error
-            text: ""
-            color: 1, 0, 0, 1
-            size_hint: 0.8, None
-            pos_hint: {'center_x': 0.5, 'center_y': 0.65}
-
-        MDTextField:
-            id: institution
-            hint_text: "School/College/University"
-            size_hint: 0.8, None
-            pos_hint: {'center_x': 0.5, 'center_y': 0.6}
-        MDLabel:
-            id: institution_error
-            text: ""
-            color: 1, 0, 0, 1
-            size_hint: 0.8, None
-            pos_hint: {'center_x': 0.5, 'center_y': 0.55}
-
-        MDRaisedButton:
-            text: "Choose Certificate"
-            size_hint: 0.8, None
-            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-            on_release: root.show_file_chooser('certificate')
-        MDLabel:
-            id: certificate_error
-            text: ""
-            color: 1, 0, 0, 1
-            size_hint: 0.8, None
-            pos_hint: {'center_x': 0.5, 'center_y': 0.45}
-
-        MDLabel:
-            id: certificate_name
-            text: ""
-            size_hint: 0.8, None
-            pos_hint: {'center_x': 0.5, 'center_y': 0.45}
-        MDIconButton:
-            icon: "close"
-            size_hint: None, None
-            size: dp(48), dp(48)
-            pos_hint: {'center_x': 0.75, 'center_y': 0.45}
-            on_release: root.clear_selection('certificate')
-
-        MDRaisedButton:
-            text: "Choose Photo"
-            size_hint: 0.8, None
-            pos_hint: {'center_x': 0.5, 'center_y': 0.4}
-            on_release: root.show_file_chooser('photo')
-        MDLabel:
-            id: photo_error
-            text: ""
-            color: 1, 0, 0, 1
-            size_hint: 0.8, None
-            pos_hint: {'center_x': 0.5, 'center_y': 0.35}
-        MDLabel:
-            id: photo_name
-            text: ""
-            size_hint: 0.8, None
-            pos_hint: {'center_x': 0.5, 'center_y': 0.35}
-        MDIconButton:
-            icon: "close"
-            size_hint: None, None
-            size: dp(48), dp(48)
-            pos_hint: {'center_x': 0.75, 'center_y': 0.45}
-            on_release: root.clear_selection('certificate')
-
-        MDRaisedButton:
-            text: "Register"
-            size_hint: None, None
-            size: 3 * dp(48), dp(48)
-            pos_hint: {'center_x': 0.5, 'center_y': 0.25}
-            on_release: root.submit_registration()
-
-        BoxLayout:
-            id: header
-            size_hint: (1, None)
-            height: "60dp"
-            pos_hint: {'center_x': 0.65, 'bottom': 0}
-
-            MDFlatButton:
-                text: "Home"
-                on_release: app.root.current = 'home'
-            MDFlatButton:
-                text: "Wallet"
-
-            MDFlatButton:
-                text: "History"
-
-            MDFlatButton:
-                text: "Profile"
 
 
 

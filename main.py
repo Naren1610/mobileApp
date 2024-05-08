@@ -12,12 +12,13 @@ import qrcode
 from kivy.uix.image import Image
 import tempfile
 import pyodbc
+from kivymd.material_resources import dp
+from kivymd.uix.dialog import MDDialog
 from kivymd.uix.list import OneLineListItem
 from kivymd.uix.menu import MDDropdownMenu
 from hashlib import sha256
-from kivymd.uix.pickers import MDDatePicker
 from kivy.uix.popup import Popup
-from kivy.uix.label import Label
+from kivy.uix.button import Button
 from datetime import datetime
 import os
 
@@ -67,15 +68,16 @@ class SignupScreen(Screen):
         try:
             cursor.execute('INSERT INTO users (firstname, lastname, email, phone, password) VALUES (?, ?, ?, ?, ?)', (firstname, lastname, email, phone, hashed_password))
             conn.commit()
+            self.manager.current = 'login'
             return True
         except pyodbc.IntegrityError:
             return False
         finally:
             conn.close()
-        self.manager.current = 'login'
+
 
     def check_user(phone, password):
-        conn = phone.get_connection()
+        conn = get_connection()
         cursor = conn.cursor()
         cursor.execute('SELECT password FROM users WHERE phone = ?', (phone,))
         result = cursor.fetchone()
@@ -111,97 +113,91 @@ class BusTicketPage(Screen):
 
 
 class PassRegistrationPage(Screen):
-    certificate_path = ''
-    photo_path = ''
+    id_proof_menu = ObjectProperty(None)
+    pass_menu = ObjectProperty(None)
+    def __init__(self, **kwargs):
+        super(PassRegistrationPage, self).__init__(**kwargs)
 
-    def show_file_chooser(self, file_type):
-        content = FileChooserIconView(filters=self.get_filters(file_type))
-        content.bind(on_submit=self.select_file(file_type))
-        popup = Popup(title="Select File", content=content, size_hint=(0.9, 0.9))
-        popup.open()
 
-    def get_filters(self, file_type):
-        if file_type == 'certificate':
-            return ['*.pdf', '*.doc', '*.docx']
-        elif file_type == 'photo':
-            return ['*.jpg', '*.jpeg', '*.png']
-        return []
+    def on_enter(self):
+        # Set up the ID proof menu only once
+        if not self.id_proof_menu:
+            self.initialize_id_proof_menu()
+        if not self.pass_menu:
+            self.initialize_pass_menu()
 
-    popup = None  # Reference to the popup
+    def initialize_id_proof_menu(self):
+        menu_items = [
+            {"viewclass": "OneLineListItem", "text": f"{proof}", "height": dp(56),
+             "on_release": lambda x=f"{proof}": self.set_id_proof(x)}
+            for proof in ["Passport", "Driver's License", "State ID"]
+        ]
+        self.id_proof_menu = MDDropdownMenu(
+            caller=self.ids.id_proof_type,
+            items=menu_items,
+            width_mult=4
+        )
 
-    def show_file_chooser(self, file_type):
-        filechooser = FileChooserIconView(filters=['*.*'], size_hint=(1, 0.9))
-        filechooser.bind(
-            on_submit=lambda instance, selection, touch: self.on_file_selected(instance, selection, touch, file_type))
+    def set_id_proof(self, proof_type):
+        self.ids.chosen_id_proof.text = proof_type
+        self.id_proof_menu.dismiss()
+    def upload_file(self, proof_type):
+        # Create a file chooser dialog for PDF files
+        content = BoxLayout(orientation='vertical')
+        filechooser = FileChooserIconView(filters=["*.pdf"])
 
-        layout = BoxLayout(orientation='vertical')
-        layout.add_widget(filechooser)
+        select_button = Button(text="Select", size_hint=(1, 0.1))
+        cancel_button = Button(text="Cancel", size_hint=(1, 0.1))
 
-        self.popup = Popup(content=layout, size_hint=(0.9, 0.9), title="Select File")
+        content.add_widget(filechooser)
+        content.add_widget(select_button)
+        content.add_widget(cancel_button)
+
+        # Create popup
+        self.popup = Popup(title=f"Select PDF for {proof_type}",
+                           content=content,
+                           size_hint=(0.9, 0.9))
+
+        # Bind the select button to the function that checks the file and dismisses the popup
+        select_button.bind(on_release=lambda x: self.check_file(filechooser.selection))
+
+        # Bind the cancel button to dismiss the popup
+        cancel_button.bind(on_release=lambda x: self.popup.dismiss())
+
         self.popup.open()
 
-    def on_file_selected(self, instance, selection, touch, file_type):
+    def check_file(self, selection):
         if selection:
-            file_path = selection[0]  # Assuming the user selects one file
-            file_name = basename(file_path)  # Extracts the file name from the path
-            if file_type == 'certificate':
-                self.ids.certificate_name.text = f"Selected: {file_name}"
-                self.certificate_path = file_path
-            elif file_type == 'photo':
-                self.ids.photo_name.text = f"Selected: {file_name}"
-                self.photo_path = file_path
-
-        if self.popup:
-            self.popup.dismiss()
-            self.popup = None
-
-    def clear_selection(self, file_type):
-        if file_type == 'certificate':
-            self.ids.certificate_name.text = ""
-            self.certificate_path = None
-        elif file_type == 'photo':
-            self.ids.photo_name.text = ""
-            self.photo_path = None
-    def submit_registration(self):
-        if not self.validate_fields():
-            return
-        print(f"Processing registration with the files: {self.certificate_path}, {self.photo_path}")
-        # Process registration here
-        Popup(content=Label(text='Registration Successful!'), size_hint=(None, None), size=(400, 400)).open()
-
-    def validate_fields(self):
-        valid = True
-        if not self.ids.full_name.text:
-            self.ids.full_name_error.text = 'Full name is required.'
-            valid = False
+            file_path = selection[0]
+            # Check if the file size is less than 1MB
+            if os.path.getsize(file_path) < 1 * 1024 * 1024:
+                self.ids.chosen_id_proof.text = file_path
+                self.popup.dismiss()
+            else:
+                self.show_error_dialog("The file size must be less than 1MB.")
         else:
-            self.ids.full_name_error.text = ''
+            self.show_error_dialog("Please select a file.")
 
-        if not self.ids.dob.text:
-            self.ids.dob_error.text = 'Date of birth is required.'
-            valid = False
-        else:
-            self.ids.dob_error.text = ''
+    def show_error_dialog(self, message):
+        dialog = MDDialog(text=message)
+        dialog.open()
 
-        if not self.ids.institution.text:
-            self.ids.institution_error.text = 'Institution name is required.'
-            valid = False
-        else:
-            self.ids.institution_error.text = ''
+    def initialize_pass_menu(self):
+        pass_types = ["Weekly", "Quarterly", "Yearly"]
+        menu_items = [
+            {"viewclass": "OneLineListItem", "text": pass_type, "height": dp(56),
+             "on_release": lambda x=pass_type: self.set_pass_type(x)}
+            for pass_type in pass_types
+        ]
+        self.pass_menu = MDDropdownMenu(
+            caller=self.ids.pass_type,
+            items=menu_items,
+            width_mult=4
+        )
 
-        if not self.certificate_path:
-            self.ids.certificate_error.text = 'Please select a certificate.'
-            valid = False
-        else:
-            self.ids.certificate_error.text = ''
-
-        if not self.photo_path:
-            self.ids.photo_error.text = 'Please select a photo.'
-            valid = False
-        else:
-            self.ids.photo_error.text = ''
-
-        return valid
+    def set_pass_type(self, pass_type):
+        self.ids.chosen_pass.text = pass_type
+        self.pass_menu.dismiss()
 
 
 class MyApp(MDApp):
@@ -211,6 +207,8 @@ class MyApp(MDApp):
         init_db()
         Builder.load_file('login.kv')
         Builder.load_file('signup.kv')
+        Builder.load_file('home.kv')
+        Builder.load_file('passes.kv')
 
         sm = ScreenManager()
         sm.add_widget(LoginPage(name='login'))

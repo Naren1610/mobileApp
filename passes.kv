@@ -1,0 +1,60 @@
+<PassRegistrationPage>:
+    name: 'pass_registration'
+    FloatLayout:
+        MDDropDownItem:
+            id: id_proof_type
+            text: "Select ID Proof Type"
+            pos_hint: {'center_x': 0.5, 'center_y': 0.65}
+            on_release: root.id_proof_menu.open()
+
+        MDLabel:
+            id: chosen_id_proof
+            text: ""
+            halign: 'center'
+            size_hint: 0.8, None
+            pos_hint: {'center_x': 0.5, 'center_y': 0.6}
+
+        MDDropDownItem:
+            id: pass_type
+            text: "Select Pass Type"
+            pos_hint: {'center_x': 0.5, 'center_y': 0.45}
+            on_release: root.pass_menu.open()
+
+        MDLabel:
+            id: chosen_pass
+            text: ""
+            halign: 'center'
+            size_hint: 0.8, None
+            pos_hint: {'center_x': 0.5, 'center_y': 0.4}
+
+        MDRaisedButton:
+            text: "Upload PDF"
+            size_hint: None, None
+            size: 3 * dp(48), dp(48)
+            pos_hint: {'center_x': 0.5, 'center_y': 0.55}
+            on_release: root.upload_file(root.ids.id_proof_type.text)
+
+        MDRaisedButton:
+            text: "Register"
+            size_hint: None, None
+            size: 3 * dp(48), dp(48)
+            pos_hint: {'center_x': 0.5, 'center_y': 0.35}
+            on_release: root.check_and_submit_registration()
+
+        BoxLayout:
+            id: header
+            size_hint: (1, None)
+            height: "60dp"
+            pos_hint: {'center_x': 0.65, 'bottom': 0}
+
+            MDFlatButton:
+                text: "Home"
+                on_release: app.root.current = 'home'
+            MDFlatButton:
+                text: "Wallet"
+
+            MDFlatButton:
+                text: "History"
+
+            MDFlatButton:
+                text: "Profile"

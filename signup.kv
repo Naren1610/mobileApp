@@ -27,8 +27,8 @@
             write_tab: False
 
         MDTextField:
-            id:phone
-            hint_text: "Phone Number"
+            id:email
+            hint_text: "Email"
             mode: "rectangle"
             size_hint_x: .85
             pos_hint: {'center_x': .5, 'center_y': .55}
@@ -36,8 +36,8 @@
             write_tab: False
 
         MDTextField:
-            id:email
-            hint_text: "Email"
+            id:phone
+            hint_text: "Phone Number"
             mode: "rectangle"
             size_hint_x: .85
             pos_hint: {'center_x': .5, 'center_y': .45}
@@ -64,4 +64,5 @@
                 font_size: "20dp"
                 size_hint_x: 1
                 md_bg_color: "#000000"
-                on_press: root.add_user(first_name.text, last_name.text, phone.text, email.text, password.text)
+                on_press: root.add_user(first_name.text, last_name.text, email.text, phone.text , password.text)
+
