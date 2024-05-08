@@ -1,60 +1,84 @@
 <PassRegistrationPage>:
-    name: 'pass_registration'
-    FloatLayout:
-        MDDropDownItem:
-            id: id_proof_type
-            text: "Select ID Proof Type"
-            pos_hint: {'center_x': 0.5, 'center_y': 0.65}
-            on_release: root.id_proof_menu.open()
+    ScrollView:
+        do_scroll_x: False
+        do_scroll_y: True
+        GridLayout:
+            id: main_grid
+            size_hint_y: None
+            height: max(self.minimum_height, root.height)
+            cols: 1
+            spacing: dp(10)
+            padding: dp(10)
 
-        MDLabel:
-            id: chosen_id_proof
-            text: ""
-            halign: 'center'
-            size_hint: 0.8, None
-            pos_hint: {'center_x': 0.5, 'center_y': 0.6}
+            MDLabel:
+                text: 'Step 1: Personal Details'
+                size_hint_y: None
+                height: dp(48)
 
-        MDDropDownItem:
-            id: pass_type
-            text: "Select Pass Type"
-            pos_hint: {'center_x': 0.5, 'center_y': 0.45}
-            on_release: root.pass_menu.open()
+            MDTextField:
+                hint_text: "Father's Name"
+                size_hint_y: None
+                height: dp(48)
 
-        MDLabel:
-            id: chosen_pass
-            text: ""
-            halign: 'center'
-            size_hint: 0.8, None
-            pos_hint: {'center_x': 0.5, 'center_y': 0.4}
+            MDTextField:
+                hint_text: "Current Residential Address"
+                size_hint_y: None
+                height: dp(48)
 
-        MDRaisedButton:
-            text: "Upload PDF"
-            size_hint: None, None
-            size: 3 * dp(48), dp(48)
-            pos_hint: {'center_x': 0.5, 'center_y': 0.55}
-            on_release: root.upload_file(root.ids.id_proof_type.text)
+            MDLabel:
+                text: 'Step 2: Education Information'
+                size_hint_y: None
+                height: dp(48)
 
-        MDRaisedButton:
-            text: "Register"
-            size_hint: None, None
-            size: 3 * dp(48), dp(48)
-            pos_hint: {'center_x': 0.5, 'center_y': 0.35}
-            on_release: root.check_and_submit_registration()
+            MDTextField:
+                hint_text: "School/College Details"
+                size_hint_y: None
+                height: dp(48)
 
-        BoxLayout:
-            id: header
-            size_hint: (1, None)
-            height: "60dp"
-            pos_hint: {'center_x': 0.65, 'bottom': 0}
+            MDLabel:
+                text: 'Step 3: Upload Files'
+                size_hint_y: None
+                height: dp(48)
 
-            MDFlatButton:
-                text: "Home"
-                on_release: app.root.current = 'home'
-            MDFlatButton:
-                text: "Wallet"
+            MDRaisedButton:
+                text: "Upload Photo"
+                on_release: root.select_photo()
+                size_hint_y: None
+                height: dp(48)
 
-            MDFlatButton:
-                text: "History"
+            MDLabel:
+                id: photo_name
+                text: ""
+                size_hint_y: None
+                height: dp(48)
 
-            MDFlatButton:
-                text: "Profile"
+            MDRaisedButton:
+                text: "Upload ID Proof"
+                on_release: root.select_id_proof()
+                size_hint_y: None
+                height: dp(48)
+
+            MDLabel:
+                id: id_proof_name
+                text: ""
+                size_hint_y: None
+                height: dp(48)
+
+            MDLabel:
+                text: 'Step 4: Route and Pass Type'
+                size_hint_y: None
+                height: dp(48)
+
+            MDDropDownItem:
+                id: route_selector
+                text: "Select Route"
+                on_release: root.open_route_menu()
+                size_hint_y: None
+                height: dp(48)
+
+            MDDropDownItem:
+                id: pass_selector
+                text: "Select Pass Type"
+                on_release: root.open_pass_menu()
+                size_hint_y: None
+                height: dp(48)

@@ -1,9 +1,5 @@
-from os.path import basename
-
 from kivy.properties import ObjectProperty
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.filechooser import FileChooserIconView, FileChooserListView
-from kivy.uix.popup import Popup
+from plyer import filechooser
 from kivymd.app import MDApp
 from kivy.lang import Builder
 from kivy.core.window import Window
@@ -113,77 +109,24 @@ class BusTicketPage(Screen):
 
 
 class PassRegistrationPage(Screen):
-    id_proof_menu = ObjectProperty(None)
-    pass_menu = ObjectProperty(None)
-    def __init__(self, **kwargs):
-        super(PassRegistrationPage, self).__init__(**kwargs)
+    photo_name = ObjectProperty(None)
+    id_proof_name = ObjectProperty(None)
 
+    def __init__(self, **kw):
+        super().__init__(**kw)
+        self.pass_menu = None
 
-    def on_enter(self):
-        # Set up the ID proof menu only once
-        if not self.id_proof_menu:
-            self.initialize_id_proof_menu()
-        if not self.pass_menu:
-            self.initialize_pass_menu()
+    def select_photo(self):
+        path = filechooser.open_file(filters=[["Images", "*.jpg", "*.jpeg", "*.png"]])
+        if path:
+            self.photo_name.text = path[0]
 
-    def initialize_id_proof_menu(self):
-        menu_items = [
-            {"viewclass": "OneLineListItem", "text": f"{proof}", "height": dp(56),
-             "on_release": lambda x=f"{proof}": self.set_id_proof(x)}
-            for proof in ["Passport", "Driver's License", "State ID"]
-        ]
-        self.id_proof_menu = MDDropdownMenu(
-            caller=self.ids.id_proof_type,
-            items=menu_items,
-            width_mult=4
-        )
-
-    def set_id_proof(self, proof_type):
-        self.ids.chosen_id_proof.text = proof_type
-        self.id_proof_menu.dismiss()
-    def upload_file(self, proof_type):
-        # Create a file chooser dialog for PDF files
-        content = BoxLayout(orientation='vertical')
-        filechooser = FileChooserIconView(filters=["*.pdf"])
-
-        select_button = Button(text="Select", size_hint=(1, 0.1))
-        cancel_button = Button(text="Cancel", size_hint=(1, 0.1))
-
-        content.add_widget(filechooser)
-        content.add_widget(select_button)
-        content.add_widget(cancel_button)
-
-        # Create popup
-        self.popup = Popup(title=f"Select PDF for {proof_type}",
-                           content=content,
-                           size_hint=(0.9, 0.9))
-
-        # Bind the select button to the function that checks the file and dismisses the popup
-        select_button.bind(on_release=lambda x: self.check_file(filechooser.selection))
-
-        # Bind the cancel button to dismiss the popup
-        cancel_button.bind(on_release=lambda x: self.popup.dismiss())
-
-        self.popup.open()
-
-    def check_file(self, selection):
-        if selection:
-            file_path = selection[0]
-            # Check if the file size is less than 1MB
-            if os.path.getsize(file_path) < 1 * 1024 * 1024:
-                self.ids.chosen_id_proof.text = file_path
-                self.popup.dismiss()
-            else:
-                self.show_error_dialog("The file size must be less than 1MB.")
-        else:
-            self.show_error_dialog("Please select a file.")
-
-    def show_error_dialog(self, message):
-        dialog = MDDialog(text=message)
-        dialog.open()
-
-    def initialize_pass_menu(self):
-        pass_types = ["Weekly", "Quarterly", "Yearly"]
+    def select_id_proof(self):
+        path = filechooser.open_file(filters=[["Documents", "*.pdf"]])
+        if path:
+            self.id_proof_name.text = path[0]
+    def open_pass_menu(self):
+        pass_types = ["Monthly", "Quarterly", "Yearly"]
         menu_items = [
             {"viewclass": "OneLineListItem", "text": pass_type, "height": dp(56),
              "on_release": lambda x=pass_type: self.set_pass_type(x)}
