@@ -1,4 +1,10 @@
 from kivy.properties import ObjectProperty
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.label import Label
+from kivy.uix.tabbedpanel import TabbedPanel, TabbedPanelItem
+from kivymd.uix.button import MDRaisedButton
+from kivymd.uix.label import MDLabel
+from kivymd.uix.textfield import MDTextField
 from plyer import filechooser
 from kivymd.app import MDApp
 from kivy.lang import Builder
@@ -14,7 +20,6 @@ from kivymd.uix.list import OneLineListItem
 from kivymd.uix.menu import MDDropdownMenu
 from hashlib import sha256
 from kivy.uix.popup import Popup
-from kivy.uix.button import Button
 from datetime import datetime
 import os
 
@@ -108,39 +113,87 @@ class BusTicketPage(Screen):
 
 
 
-class PassRegistrationPage(Screen):
-    photo_name = ObjectProperty(None)
-    id_proof_name = ObjectProperty(None)
+class PassRegistrationScreenManager(ScreenManager):
+    def go_to_next(self, current_screen):
+        if current_screen == 'personal_details':
+            self.current = 'education_information'
+        elif current_screen == 'education_information':
+            self.current = 'upload_files'
 
-    def __init__(self, **kw):
-        super().__init__(**kw)
-        self.pass_menu = None
+    def go_to_prev(self, current_screen):
+        if current_screen == 'education_information':
+            self.current = 'personal_details'
+        elif current_screen == 'upload_files':
+            self.current = 'education_information'
+
+class PersonalDetailsScreen(Screen):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        layout = BoxLayout(orientation='vertical', padding='10dp', spacing='10dp')
+        layout.add_widget(MDTextField(hint_text="Father's Name"))
+        layout.add_widget(MDTextField(hint_text="Current Residential Address"))
+        layout.add_widget(MDRaisedButton(text="Next", on_release=lambda x: self.manager.go_to_next('personal_details')))
+        self.add_widget(layout)
+
+class EducationInformationScreen(Screen):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        layout = BoxLayout(orientation='vertical', padding='10dp', spacing='10dp')
+        layout.add_widget(MDTextField(hint_text="School/College Details"))
+        layout.add_widget(MDRaisedButton(text="Previous", on_release=lambda x: self.manager.go_to_prev('education_information')))
+        layout.add_widget(MDRaisedButton(text="Next", on_release=lambda x: self.manager.go_to_next('education_information')))
+        self.add_widget(layout)
+
+class UploadFilesScreen(Screen):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        layout = BoxLayout(orientation='vertical', padding='10dp', spacing='10dp')
+        layout.add_widget(MDRaisedButton(text="Upload Photo", on_release=self.select_photo))
+        layout.add_widget(MDLabel(id='photo_name'))
+        layout.add_widget(MDRaisedButton(text="Upload ID Proof", on_release=self.select_id_proof))
+        layout.add_widget(MDLabel(id='id_proof_name'))
+        layout.add_widget(MDRaisedButton(text="Previous", on_release=lambda x: self.manager.go_to_prev('upload_files')))
+        self.add_widget(layout)
+
 
     def select_photo(self):
+        # Use plyer filechooser to select a photo
+        print("method triggered")
         path = filechooser.open_file(filters=[["Images", "*.jpg", "*.jpeg", "*.png"]])
         if path:
-            self.photo_name.text = path[0]
+            self.photo_name.text = path[0]  # Update the photo_name label with the selected path
 
     def select_id_proof(self):
+        # Use plyer filechooser to select an ID proof
         path = filechooser.open_file(filters=[["Documents", "*.pdf"]])
         if path:
-            self.id_proof_name.text = path[0]
+            self.id_proof_name.text = path[0]  # Update the id_proof_name label with the selected path
+
     def open_pass_menu(self):
+        # Dropdown menu for selecting the pass type
         pass_types = ["Monthly", "Quarterly", "Yearly"]
-        menu_items = [
-            {"viewclass": "OneLineListItem", "text": pass_type, "height": dp(56),
-             "on_release": lambda x=pass_type: self.set_pass_type(x)}
-            for pass_type in pass_types
-        ]
+        menu_items = [{"viewclass": "OneLineListItem", "text": pass_type, "height": dp(56),
+                       "on_release": lambda x=pass_type: self.set_pass_type(x)}
+                      for pass_type in pass_types]
         self.pass_menu = MDDropdownMenu(
-            caller=self.ids.pass_type,
+            caller=self.ids.pass_type,  # Ensure there is an element with id 'pass_type' in the kv layout
             items=menu_items,
             width_mult=4
         )
 
     def set_pass_type(self, pass_type):
-        self.ids.chosen_pass.text = pass_type
-        self.pass_menu.dismiss()
+        self.ids.chosen_pass.text = pass_type  # Update the chosen_pass label with the selected pass type
+        self.pass_menu.dismiss()  # Dismiss the menu after selection
+class PassRegistrationContainer(Screen):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        # Create and add the PassRegistrationScreenManager to this container screen
+        self.pass_reg_manager = PassRegistrationScreenManager()
+        self.add_widget(self.pass_reg_manager)
+        # Add individual registration step screens to the PassRegistrationScreenManager
+        self.pass_reg_manager.add_widget(PersonalDetailsScreen(name='personal_details'))
+        self.pass_reg_manager.add_widget(EducationInformationScreen(name='education_information'))
+        self.pass_reg_manager.add_widget(UploadFilesScreen(name='upload_files'))
 
 
 class MyApp(MDApp):
@@ -152,13 +205,12 @@ class MyApp(MDApp):
         Builder.load_file('signup.kv')
         Builder.load_file('home.kv')
         Builder.load_file('passes.kv')
-
         sm = ScreenManager()
         sm.add_widget(LoginPage(name='login'))
         sm.add_widget(HomePage(name='home'))
         sm.add_widget(SignupScreen(name='signup'))
         sm.add_widget(BusTicketPage(name='bus_ticket'))
-        sm.add_widget(PassRegistrationPage(name='pass_registration'))
+        sm.add_widget(PassRegistrationContainer(name='pass_registration'))
 
         return sm
 
